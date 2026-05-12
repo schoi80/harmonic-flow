@@ -35,18 +35,51 @@ targets:
       - path: Sources/HarmonicFlow
     dependencies:
       - target: TensorFlowLite
+    info:
+      path: Sources/HarmonicFlow/Info.plist
+      properties:
+        CFBundleDisplayName: HarmonicFlow
+        LSRequiresIPhoneOS: true
+        NSBluetoothAlwaysUsageDescription: HarmonicFlow uses Bluetooth to send wireless MIDI to compatible instruments and apps.
+        NSLocalNetworkUsageDescription: HarmonicFlow uses the local network to publish and connect to RTP-MIDI sessions.
+        NSMicrophoneUsageDescription: HarmonicFlow needs microphone access to transcribe vocal melodies into chord suggestions.
+        NSSupportsLiveActivities: false
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+        UILaunchScreen: {}
+        UIRequiresFullScreen: true
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.schoi80.HarmonicFlow
-        GENERATE_INFOPLIST_FILE: YES
         TARGETED_DEVICE_FAMILY: "1,2"
-        INFOPLIST_KEY_CFBundleDisplayName: HarmonicFlow
-        INFOPLIST_KEY_UILaunchScreen_Generation: YES
-        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
-        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
-        INFOPLIST_KEY_UIRequiresFullScreen: YES
-        INFOPLIST_KEY_NSMicrophoneUsageDescription: "HarmonicFlow needs microphone access to transcribe vocal melodies into chord suggestions."
-        INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: "HarmonicFlow uses Bluetooth to send wireless MIDI to compatible instruments and apps."
-        INFOPLIST_KEY_NSLocalNetworkUsageDescription: "HarmonicFlow uses the local network to publish and connect to RTP-MIDI sessions."
-        INFOPLIST_KEY_NSSupportsLiveActivities: NO
         SUPPORTS_MACCATALYST: NO
+
+  HarmonicFlowTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Tests/HarmonicFlowTests
+    dependencies:
+      - target: HarmonicFlow
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.schoi80.HarmonicFlowTests
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/HarmonicFlow.app/HarmonicFlow
+        BUNDLE_LOADER: $(TEST_HOST)
+
+  HarmonicFlowUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Tests/HarmonicFlowUITests
+    dependencies:
+      - target: HarmonicFlow
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.schoi80.HarmonicFlowUITests
+        TEST_TARGET_NAME: HarmonicFlow
