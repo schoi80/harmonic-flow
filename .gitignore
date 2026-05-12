@@ -1,0 +1,51 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode user state
+*.xcuserstate
+*.xcscmblueprint
+xcuserdata/
+*.moved-aside
+DerivedData/
+
+# Generated Xcode projects/workspaces
+# Regenerate HarmonicFlow.xcodeproj from project.yml with XcodeGen.
+*.xcodeproj/
+*.xcworkspace/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+# Keep Package.resolved committed for app reproducibility when dependencies are added.
+
+# CocoaPods / Carthage / SwiftPM binary checkouts
+Pods/
+Carthage/Build/
+SourcePackages/
+
+# Fastlane output
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output/
+
+# App archives and symbols
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.xcarchive
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# Local configuration and secrets
+*.local.xcconfig
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log

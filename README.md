@@ -20,23 +20,30 @@ HarmonicFlow is a multi-touch copilot synthesizer for iOS 17+. It acts as an adv
 
 1. **Clone the repository**:
    \`\`\`bash
-   git clone https://github.com/your-username/HarmonicFlow.git
-   cd HarmonicFlow
+   git clone https://github.com/schoi80/harmonic-flow.git
+   cd harmonic-flow
    \`\`\`
 
-2. **Generate Xcode Project (Optional)**:
-   If you have XcodeGen installed, you can generate the `.xcodeproj` file:
+2. **Install XcodeGen**:
+   HarmonicFlow keeps generated Xcode files out of source control. Install XcodeGen if needed:
+   \`\`\`bash
+   brew install xcodegen
+   \`\`\`
+
+3. **Generate the Xcode project**:
    \`\`\`bash
    xcodegen generate
    \`\`\`
-   Alternatively, you can open the folder directly in Xcode using the `Package.swift`.
 
-3. **Open the Project**:
-   Open `HarmonicFlow.xcodeproj` (or open the package folder) in Xcode.
+4. **Open the project**:
+   Open `HarmonicFlow.xcodeproj` in Xcode.
 
-4. **Build and Run**:
-   Select your desired simulator or a physical iOS 17+ device and hit **Run** (Cmd + R).
-   *Note: Real-time audio pitch detection and LiteRT inference run significantly better on a physical device.*
+5. **Configure signing**:
+   Select the `HarmonicFlow` target and set your Apple Development Team before building for a device.
+
+6. **Build and run**:
+   Select an iOS 17+ simulator or physical device and press **Run** (Cmd + R).
+   *Note: Real-time audio pitch detection, Bluetooth MIDI, and LiteRT inference run significantly better on a physical device.*
 
 ## How to Use
 
