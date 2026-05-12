@@ -18,7 +18,7 @@ class AudioRecorder: ObservableObject {
 
     func setupRecording() {
         // Explicitly request microphone permissions to avoid crashing
-        AVAudioSession.sharedInstance().requestRecordPermission { [weak self] granted in
+        requestMicrophonePermission { [weak self] granted in
             guard granted else {
                 print("Microphone permission denied.")
                 return
@@ -30,10 +30,28 @@ class AudioRecorder: ObservableObject {
         }
     }
 
+    private func requestMicrophonePermission(completion: @escaping (Bool) -> Void) {
+        if #available(iOS 17.0, *) {
+            AVAudioApplication.requestRecordPermission(completionHandler: completion)
+        } else {
+            AVAudioSession.sharedInstance().requestRecordPermission(completion)
+        }
+    }
+
     private func installTap() {
         inputNode = engine.inputNode
-        let inputFormat = inputNode.inputFormat(forBus: 0)
 
+        // AVAudioInputNode exposes microphone audio on its output bus. Using
+        // inputFormat(forBus:) here can produce a 0 Hz / 0 channel format on
+        // device, which crashes installTap with
+        // IsFormatSampleRateAndChannelCountValid(format).
+        let inputFormat = inputNode.outputFormat(forBus: 0)
+        guard inputFormat.sampleRate > 0, inputFormat.channelCount > 0 else {
+            print("Unable to install microphone tap: invalid input format \(inputFormat)")
+            return
+        }
+
+        inputNode.removeTap(onBus: 0)
         inputNode.installTap(onBus: 0, bufferSize: 2048, format: inputFormat) { [weak self] (buffer, time) in
             guard let self = self, self.isRecording else { return }
 
