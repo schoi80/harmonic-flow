@@ -12,18 +12,20 @@ let package = Package(
             targets: ["HarmonicFlow"]),
     ],
     dependencies: [
+        .package(url: "https://github.com/nethouse/TensorFlowLiteSwift.git", branch: "master")
     ],
     targets: [
         .target(
-            name: "TensorFlowLite",
-            path: "Sources/TensorFlowLite"
-        ),
-        .target(
             name: "HarmonicFlow",
             dependencies: [
-                "TensorFlowLite"
+                .product(name: "TensorFlowLite", package: "TensorFlowLiteSwift")
             ],
             path: "Sources/HarmonicFlow"
+        ),
+        .testTarget(
+            name: "HarmonicFlowTests",
+            dependencies: ["HarmonicFlow"],
+            path: "Tests/HarmonicFlowTests"
         ),
     ]
 )

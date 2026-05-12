@@ -58,6 +58,16 @@ HarmonicFlow is a multi-touch copilot synthesizer for iOS 17+. It acts as an adv
    - Connect your iPhone to your Mac's Audio MIDI Setup via Wi-Fi Network MIDI (RTP).
    - HarmonicFlow will broadcast Note events and dial movements as CC data (CC20 and CC21).
 
+## Important Note on AI Inference (LiteRT/TensorFlow)
+
+This repository currently uses a compiled **stub** module (`Sources/TensorFlowLite`) to allow the project to build cleanly out-of-the-box via Swift Package Manager (which official TensorFlow does not natively support well).
+
+**Before deploying to TestFlight or the App Store, you must swap this stub with the real XCFramework.**
+
+To do this:
+1. Delete `Sources/TensorFlowLite`.
+2. Install via CocoaPods (`pod "TensorFlowLiteSwift"`) or link a downloaded `.xcframework` binary in Xcode.
+
 ## Architecture
 
 - **`AudioEngineManager`**: Handles `AVAudioEngine`, audio sessions (low-latency 64-sample buffer), and acts as the orchestrator.
