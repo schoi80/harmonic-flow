@@ -1,0 +1,24 @@
+name: HarmonicFlow
+options:
+  bundleIdPrefix: com.example
+targets:
+  TensorFlowLite:
+    type: framework
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources: [Sources/TensorFlowLite]
+  HarmonicFlow:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources: [Sources/HarmonicFlow]
+    dependencies:
+      - target: TensorFlowLite
+    settings:
+      base:
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "HarmonicFlow needs access to the microphone to transcribe your vocal melodies into chords."
+        INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription: "HarmonicFlow uses Bluetooth to send wireless MIDI to your DAW."
