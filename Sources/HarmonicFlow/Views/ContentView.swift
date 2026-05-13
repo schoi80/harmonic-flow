@@ -2,22 +2,20 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var audioManager = AudioEngineManager()
-    @StateObject private var recorder: AudioRecorder
 
     @State private var selectedRootIndex = 0
     @State private var selectedQualityIndex = 0
 
-    init() {
-        let manager = AudioEngineManager()
-        _audioManager = StateObject(wrappedValue: manager)
-        _recorder = StateObject(wrappedValue: AudioRecorder(engine: manager.engine))
-    }
+    // Track active interactions
+    @State private var isRootInteracting = false
+    @State private var isQualityInteracting = false
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
             VStack {
+                // Top Bar
                 HStack {
                     Text("HarmonicFlow")
                         .font(.largeTitle.weight(.black))
@@ -35,36 +33,83 @@ struct ContentView: View {
                 }
                 .padding()
 
-                AICopilotView(recorder: recorder)
-
                 Spacer()
 
-                DualDialView(
-                    selectedRootIndex: $selectedRootIndex,
-                    selectedQualityIndex: $selectedQualityIndex,
-                    onChordChange: playCurrentChord,
-                    onRootCC: { val in audioManager.sendCC(cc: 20, value: val) },
-                    onQualityCC: { val in audioManager.sendCC(cc: 21, value: val) }
-                )
+                // Main Performance Area
+                HStack {
+                    // Left Control (Root Note)
+                    RadialDialView(
+                        segments: rootNotes,
+                        selectedIndex: $selectedRootIndex,
+                        title: "Root",
+                        onChange: {
+                            audioManager.sendCC(cc: 20, value: UInt8(selectedRootIndex * 10))
+                            updatePlayback()
+                        },
+                        onInteractionChange: { isInteracting in
+                            isRootInteracting = isInteracting
+                            updatePlayback()
+                        }
+                    )
+                    .frame(width: 320, height: 320)
+                    .padding(.leading, 30)
+
+                    Spacer()
+
+                    // Center Active Chord Display
+                    VStack {
+                        Text("Active Chord")
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                        Text(currentChordName)
+                            .font(.system(size: 60, weight: .bold, design: .rounded))
+                            .foregroundColor(isCurrentlyPlaying ? .cyan : .white)
+                            .shadow(color: isCurrentlyPlaying ? .cyan.opacity(0.8) : .clear, radius: 20, x: 0, y: 0)
+                    }
+
+                    Spacer()
+
+                    // Right Control (Quality)
+                    RadialDialView(
+                        segments: chordQualities,
+                        selectedIndex: $selectedQualityIndex,
+                        title: "Quality",
+                        onChange: {
+                            audioManager.sendCC(cc: 21, value: UInt8(selectedQualityIndex * 15))
+                            updatePlayback()
+                        },
+                        onInteractionChange: { isInteracting in
+                            isQualityInteracting = isInteracting
+                            updatePlayback()
+                        }
+                    )
+                    .frame(width: 320, height: 320)
+                    .padding(.trailing, 30)
+                }
+                .padding(.bottom, 20)
 
                 Spacer()
-
-                Text("Active Chord: \(currentChordName)")
-                    .font(.title2)
-                    .foregroundColor(.cyan)
-                    .padding(.bottom, 20)
             }
         }
         .onAppear {
-            recorder.setupRecording()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                playCurrentChord()
-            }
+            // No auto-play on appear, must be touched
         }
     }
 
     var currentChordName: String {
         return "\(rootNotes[selectedRootIndex])\(chordQualities[selectedQualityIndex])"
+    }
+
+    var isCurrentlyPlaying: Bool {
+        return isRootInteracting || isQualityInteracting
+    }
+
+    func updatePlayback() {
+        if isCurrentlyPlaying {
+            playCurrentChord()
+        } else {
+            audioManager.stopAll()
+        }
     }
 
     func playCurrentChord() {

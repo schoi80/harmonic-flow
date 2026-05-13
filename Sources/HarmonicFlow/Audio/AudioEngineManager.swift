@@ -48,7 +48,7 @@ class AudioEngineManager: ObservableObject {
     private func setupAudioSession() {
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playAndRecord, mode: .default, options: [.mixWithOthers, .defaultToSpeaker])
+            try session.setCategory(.playback, mode: .default, options: [.mixWithOthers])
             let preferredBufferSize = 64.0 / session.sampleRate
             try session.setPreferredIOBufferDuration(preferredBufferSize)
             try session.setActive(true)
