@@ -6,47 +6,12 @@ let rootNotes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
 // Represents common chord qualities
 let chordQualities = ["maj", "maj7", "7", "sus4", "m", "m7", "dim", "aug"]
 
-struct DualDialView: View {
-    @Binding var selectedRootIndex: Int
-    @Binding var selectedQualityIndex: Int
-    var onChordChange: () -> Void
-    var onRootCC: ((UInt8) -> Void)?
-    var onQualityCC: ((UInt8) -> Void)?
-
-    var body: some View {
-        HStack(spacing: 50) {
-            // Left Control (Root Note)
-            RadialDialView(
-                segments: rootNotes,
-                selectedIndex: $selectedRootIndex,
-                title: "Root",
-                onChange: {
-                    onChordChange()
-                    onRootCC?(UInt8(selectedRootIndex * 10)) // map 0-11 to 0-110 CC val
-                }
-            )
-            .frame(width: 250, height: 250)
-
-            // Right Control (Quality)
-            RadialDialView(
-                segments: chordQualities,
-                selectedIndex: $selectedQualityIndex,
-                title: "Quality",
-                onChange: {
-                    onChordChange()
-                    onQualityCC?(UInt8(selectedQualityIndex * 15)) // map 0-7 to 0-105 CC val
-                }
-            )
-            .frame(width: 250, height: 250)
-        }
-    }
-}
-
 struct RadialDialView: View {
     let segments: [String]
     @Binding var selectedIndex: Int
     let title: String
     var onChange: () -> Void
+    var onInteractionChange: (Bool) -> Void // Callback for active touch tracking
 
     @State private var dragAngle: Angle = .zero
 
@@ -54,6 +19,7 @@ struct RadialDialView: View {
         GeometryReader { geometry in
             let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
             let radius = geometry.size.width / 2
+            let innerRadius: CGFloat = 40.0 // The center label radius
 
             ZStack {
                 // Background
@@ -66,18 +32,18 @@ struct RadialDialView: View {
                     let angle = Angle(degrees: Double(index) / Double(segments.count) * 360.0 - 90.0)
 
                     Text(segments[index])
-                        .font(.system(size: 16, weight: selectedIndex == index ? .bold : .regular))
+                        .font(.system(size: 20, weight: selectedIndex == index ? .bold : .regular)) // Larger font
                         .foregroundColor(selectedIndex == index ? .cyan : .gray)
                         .position(
-                            x: center.x + CGFloat(cos(angle.radians)) * (radius - 30),
-                            y: center.y + CGFloat(sin(angle.radians)) * (radius - 30)
+                            x: center.x + CGFloat(cos(angle.radians)) * (radius - 45), // Moved slightly more inward
+                            y: center.y + CGFloat(sin(angle.radians)) * (radius - 45)
                         )
                 }
 
                 // Center Label
                 Circle()
                     .fill(Color(white: 0.2))
-                    .frame(width: 80, height: 80)
+                    .frame(width: innerRadius * 2, height: innerRadius * 2)
 
                 VStack {
                     Text(title)
@@ -94,14 +60,24 @@ struct RadialDialView: View {
                 let endAngle = Angle(degrees: Double(selectedIndex) * segmentAngle - 90.0 + segmentAngle/2)
 
                 Path { path in
-                    path.addArc(center: center, radius: radius - 5, startAngle: startAngle, endAngle: endAngle, clockwise: false)
+                    path.addArc(center: center, radius: radius - 10, startAngle: startAngle, endAngle: endAngle, clockwise: false) // Moved inward slightly
                 }
-                .stroke(Color.cyan, lineWidth: 10)
+                .stroke(Color.cyan, lineWidth: 15) // Thicker indicator
             }
             .gesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
                         let vector = CGVector(dx: value.location.x - center.x, dy: value.location.y - center.y)
+                        let distance = sqrt(vector.dx * vector.dx + vector.dy * vector.dy)
+
+                        // If touch is inside the center label, stop interaction
+                        if distance < innerRadius {
+                            onInteractionChange(false)
+                            return
+                        } else {
+                            onInteractionChange(true)
+                        }
+
                         var angle = atan2(vector.dy, vector.dx) + .pi / 2 // Offset by 90deg so top is 0
                         if angle < 0 { angle += 2 * .pi }
 
@@ -117,6 +93,9 @@ struct RadialDialView: View {
                             triggerHaptic()
                             onChange()
                         }
+                    }
+                    .onEnded { _ in
+                        onInteractionChange(false)
                     }
             )
         }
